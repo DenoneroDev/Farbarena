@@ -94,6 +94,11 @@ public class Arena {
         return DefaultBlock;
         
     }
+    public static void setIsGameStarted(boolean b) {
+        
+        isGameStarted = b;
+        
+    }
     public static List<Location> DecodeToLocation(List<String> s) {
         
         List<Location> list = new ArrayList<>();
@@ -127,7 +132,7 @@ public class Arena {
     public static Location getWatcherSpawn() {
         
         String[] s = getConfig().getString("watcherspawn").split(", ");
-        Location loc = new Location(Double.parseDouble(s[0].replace("x=", "")), Double.parseDouble(s[1].replace("y=", "")), Double.parseDouble(s[2].replace("z=", "")));
+        Location loc = new Location(Double.parseDouble(s[1].replace("x=", "")), Double.parseDouble(s[2].replace("y=", "")), Double.parseDouble(s[3].replace("z=", "")), Server.getInstance().getLevelByName(s[0].replace("level=", "")));
         
         return loc;
         
@@ -144,7 +149,7 @@ public class Arena {
     }
     public static String getColorCodeByBlockColor(int i) {
         
-        String color = "f,6,5,b,e,a,d,8,7,3,5,9,6,2,4,0";
+        String color = "f,8,5,b,e,a,d,8,7,3,8,9,8,2,4,0";
         return color.split(",")[i];
         
     }
@@ -156,8 +161,27 @@ public class Arena {
     }
     public static String Location(double x, double y, double z) {
         
-        return x + ", " + y + ", " + z;
+        return "x=" + x + ", y=" + y + ", z=" + z;
         
     }
-    
+    public static String Location(double x, double y, double z, Level l) {
+        
+        return "level=" + l.getName() + ", x=" + x + ", y=" + y + ", z=" + z;
+        
+    }
+    public static String rotate(String s) {
+        
+        String ReturnValue = " ";
+        
+        for(int i = s.length(); i != 0; i--)
+            ReturnValue = ReturnValue + s.charAt(i - 1);
+            
+        return ReturnValue;
+        
+    }
+    public static boolean isWatcherSpawnSaved() {
+        
+        return getConfig().exists("watcherspawn");
+        
+    }
 }

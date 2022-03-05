@@ -58,13 +58,13 @@ public class Board {
             int SecondY = (int) ((FirstAngle.getY() > SecondAngle.getY()) ? FirstAngle.getY() : SecondAngle.getY());
             int SecondZ = (int) ((FirstAngle.getZ() > SecondAngle.getZ()) ? FirstAngle.getZ() : SecondAngle.getZ());
             
-            String newFirstLocation = new Location(FirstX, FirstY, FirstZ, Arena.getGameWorld()).toString();
-            String newSecondLocation = new Location(SecondX, SecondY, SecondZ, Arena.getGameWorld()).toString();
+            String newFirstLocation = Arena.Location(FirstX, FirstY, FirstZ);
+            String newSecondLocation = Arena.Location(SecondX, SecondY, SecondZ);
             
             Arena.getConfig().set(ConfigPath, Arrays.asList(newFirstLocation, newSecondLocation));
             Arena.getConfig().save();
             load();
-            
+
         });
         
         
@@ -91,9 +91,6 @@ public class Board {
     public void load() {
         
         List<Location> Angles = Arena.DecodeToLocation(Arena.getConfig().getStringList(ConfigPath));
-        
-        System.out.println(Angles);
-        
         Location FirstAngle = Angles.get(0);
         Location SecondAngle = Angles.get(1);
         
@@ -137,6 +134,9 @@ public class Board {
                 FirstY++;
                 
             }
+            
+            for(Location l : Blocks)
+                Arena.getGameWorld().setBlock(l, Arena.getDefaultBlock());
             
         });
         

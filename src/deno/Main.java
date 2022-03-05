@@ -53,18 +53,19 @@ public class Main extends PluginBase {
         cmd2.getCommandParameters().clear();
         cmd2.getCommandParameters().put("default", new CommandParameter[]{
                 
-                CommandParameter.newEnum("subject", new CommandEnum("setwatcherspawn", "setwatcherspawn", "sws", "ws", "watcherspawn")),
+                CommandParameter.newEnum("subject", new CommandEnum("watcherspawn|wspawn", "watcherspawn", "wspawn")),
+                CommandParameter.newEnum("action", new CommandEnum("set|del", "set", "del")),
 
         });
         cmd2.getCommandParameters().put("Floor|Board", new CommandParameter[]{
         
-                CommandParameter.newEnum("subject", new CommandEnum("floor|board", "floor", "f", "board", "b")),
-                CommandParameter.newEnum("action", new CommandEnum("create|delete", "create", "c", "delete", "del", "d")),
+                CommandParameter.newEnum("subject", new CommandEnum("floor|board", "floor", "board")),
+                CommandParameter.newEnum("action", new CommandEnum("create|delete", "create", "c", "delete", "del")),
 
         });
         cmd2.getCommandParameters().put("World", new CommandParameter[]{
                 
-                CommandParameter.newEnum("subject", new CommandEnum("world", "world", "w", "level", "lvl", "l")),
+                CommandParameter.newEnum("subject", new CommandEnum("world", "world", "level", "lvl")),
                 CommandParameter.newEnum("action", new CommandEnum("create", "create", "c")),
 
         });

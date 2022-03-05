@@ -6,7 +6,6 @@ import cn.nukkit.event.Listener;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.event.player.PlayerItemHeldEvent;
 import cn.nukkit.event.player.PlayerQuitEvent;
-import cn.nukkit.level.Sound;
 import deno.arena.Arena;
 
 public class GameListener implements Listener {
@@ -42,7 +41,6 @@ public class GameListener implements Listener {
             return;
         
         e.setCancelled();
-        GamePlayers.PlaySound(Sound.AMBIENT_WEATHER_THUNDER);
         GamePlayers.GameOver(p);
         
     }

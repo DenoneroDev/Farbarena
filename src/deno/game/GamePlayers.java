@@ -9,7 +9,6 @@ import cn.nukkit.level.Position;
 import cn.nukkit.level.Sound;
 import cn.nukkit.network.protocol.PlaySoundPacket;
 import cn.nukkit.network.protocol.TextPacket;
-import cn.nukkit.scheduler.TaskHandler;
 import cn.nukkit.utils.TextFormat;
 import deno.Main;
 import deno.arena.Arena;
@@ -22,6 +21,7 @@ public class GamePlayers {
     private static int max = 10;
     private static int min = 1; //TODO 2
     private static boolean isEnoughPlayers = false;
+    private static boolean canRun = true;
     
     public static CopyOnWriteArrayList<Player> getWaiters() {
         
@@ -64,7 +64,7 @@ public class GamePlayers {
         p.sendTip(msg);
         
     }
-    public static void sendCountPopup(Player p, String msg) {
+    public static void sendPlayerCountPopup(Player p, String msg) {
         
         TextPacket pk = new TextPacket();
         pk.type = TextPacket.TYPE_JUKEBOX_POPUP;
@@ -83,13 +83,13 @@ public class GamePlayers {
         /* p.sendActionBar(msg); */ //Das gleiche, nur mit schwarzen Hintergrund.
         
     }
-    public static void sendCountPopupToAll(String message) {
+    public static void sendPlayerCountPopupToAll(String message) {
         
         if(!Waiting.isEmpty()) {
             
             Waiting.forEach(waiter -> {
                 
-                sendCountPopup(waiter, message);
+                sendPlayerCountPopup(waiter, message);
                 
             });
             
@@ -98,7 +98,7 @@ public class GamePlayers {
             
             Watcher.forEach(watcher -> {
                 
-                sendCountPopup(watcher, message);
+                sendPlayerCountPopup(watcher, message);
                 
             });
             
@@ -107,7 +107,7 @@ public class GamePlayers {
             
             Gamer.forEach(gamer -> {
                 
-                sendCountPopup(gamer, message);
+                sendPlayerCountPopup(gamer, message);
                 
             });
             
@@ -147,16 +147,53 @@ public class GamePlayers {
     }
     public static void playSoundFor(Player p, Sound s) {
         
+        playSoundFor(p, s, 1);
+        
+    }
+    public static void playSoundFor(Player p, Sound s, int pitch) {
+        
         PlaySoundPacket pk = new PlaySoundPacket();
         
         pk.name = s.getSound();
         pk.volume = 1;
-        pk.pitch = 1;
+        pk.pitch = pitch;
         pk.x = (int) p.x;
         pk.y = (int) p.y;
         pk.z = (int) p.z;
         
         p.dataPacket(pk);
+        
+    }
+    
+    public static void PlaySound(Sound s, int p) {
+        
+        if(!Waiting.isEmpty()) {
+            
+            Waiting.forEach(waiter -> {
+                
+                playSoundFor(waiter, s, p);
+                
+            });
+            
+        }
+        if(!Watcher.isEmpty()) {
+            
+            Watcher.forEach(watcher -> {
+                
+                playSoundFor(watcher, s, p);
+                
+            });
+            
+        }
+        if(!Gamer.isEmpty()) {
+            
+            Gamer.forEach(gamer -> {
+                
+                playSoundFor(gamer, s, p);
+                
+            });
+            
+        }
         
     }
     
@@ -166,7 +203,7 @@ public class GamePlayers {
             
             Waiting.forEach(waiter -> {
                 
-                playSoundFor(waiter, s);
+                playSoundFor(waiter, s, 1);
                 
             });
             
@@ -175,7 +212,7 @@ public class GamePlayers {
             
             Watcher.forEach(watcher -> {
                 
-                playSoundFor(watcher, s);
+                playSoundFor(watcher, s, 1);
                 
             });
             
@@ -184,7 +221,7 @@ public class GamePlayers {
             
             Gamer.forEach(gamer -> {
                 
-                playSoundFor(gamer, s);
+                playSoundFor(gamer, s, 1);
                 
             });
             
@@ -207,7 +244,8 @@ public class GamePlayers {
             
             Watcher.forEach(watcher -> {
                 
-                watcher.teleport(l);
+                if(watcher.getLevel() != Arena.getLobbyWorld())
+                    watcher.teleport(l);
                 
             });
             
@@ -216,7 +254,8 @@ public class GamePlayers {
             
             Gamer.forEach(gamer -> {
                 
-                gamer.teleport(l);
+                if(gamer.getLevel() != Arena.getLobbyWorld())
+                    gamer.teleport(l);
                 
             });
             
@@ -304,12 +343,24 @@ public class GamePlayers {
         }
         
     }
-    public static void GameOver(Player p) {
+    public synchronized static void GameOver(Player p) {
         
         if(!p.getInventory().isEmpty()) 
             p.getInventory().clearAll();
-        if(p.isOnline())
-            p.teleport(Arena.getWatcherSpawn());
+        if(Arena.isWatcherSpawnSaved()) {
+            
+            if(p.isOnline())
+                p.teleport(Arena.getWatcherSpawn());
+            
+        } else {
+            
+            if(p.isOnline()) {
+                
+                p.teleport(Arena.getLobbyWorld().getSpawnLocation());
+                
+            }
+            
+        }
         if(Gamer.size() > 1) {
             
             sendMessageToAll(TextFormat.GOLD + "#" + Gamer.size() + "  " + TextFormat.DARK_RED + p.getName() + " hat verloren!");
@@ -317,17 +368,33 @@ public class GamePlayers {
             
             if(p.isOnline()) {
                 
-                Watcher.add(p);
+                if(Arena.isWatcherSpawnSaved()) {
+                    
+                    Watcher.add(p);
+                    
+                }
+                Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> {
+                    
+                    GamePlayers.PlaySound(Sound.AMBIENT_WEATHER_THUNDER);
+                    
+                }, 2);
                 
             }
             
+            if(Gamer.size() == 1 && canRun == true) {
+                
+                end();
+                canRun = false;
+                
+            }
+                
             return;
         }
-
-        end();
+        if(canRun == true)
+            end();
         
     }
-    public static void end() {
+    public synchronized static void end() {
         
         Arena.getFloor().placedBlockLocations.clear();
         Arena.getFloor().usedIntegers.clear();
@@ -339,23 +406,25 @@ public class GamePlayers {
         Arena.getFloor().reset();
         Arena.getBoard().reset();
         
-        for(TaskHandler Task : GameSchedule.allTasks) {
-            
-            Task.cancel();
-            
-        }
-        GameSchedule.allTasks.clear();
-            
+        Main.plugin.getServer().getScheduler().cancelTask(Main.plugin);
+        
         if(Gamer.get(0).isOnline()) {
             
             Gamer.get(0).sendTitle(TextFormat.GREEN + "Du hast gewonnen :D");
             sendMessageToAll(TextFormat.colorize("&3" + Gamer.get(0).getName() + " &dhat das Spiel gewonnen!"));
+            
+            Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> {
+                
+                playSoundFor(Gamer.get(0), Sound.FIREWORK_LAUNCH);
+                
+            }, 2);
             
         }
             
         
         Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> {
             
+            Arena.setIsGameStarted(false);
             isEnoughPlayers = false;
             teleport(Arena.getLobbyWorld().getSpawnLocation());
                 
@@ -367,19 +436,20 @@ public class GamePlayers {
                     return;
                     
                 }
-                Waiting.add(Gamer.get(0));
-                sendPopup(Gamer.get(0), TextFormat.DARK_GREEN + "Du wurdes automatisch eingetragen :D");
+                if(Gamer.get(0).isOnline()) {
+                    
+                    Waiting.add(Gamer.get(0));
+                    sendPopup(Gamer.get(0), TextFormat.DARK_GREEN + "Du wurdes automatisch eingetragen :D");
+                    
+                }
                 
                 if(Waiting.size() >= min) {
                     
                     if(isEnoughPlayers() == false) {
                         
                         sendPopupToAll(TextFormat.DARK_GREEN + "Es sind genug Spieler in der Warteliste eingetragen, das Spiel beginnt gleich...");
-                        
                         PlaySound(Sound.NOTE_HAT);
-                        
                         GameSchedule.RoundStart();
-                        
                         GamePlayers.setEnoughPlayers(true);
                         
                     }
@@ -395,6 +465,7 @@ public class GamePlayers {
                     if(Waiting.size() >= max) {
                         
                         sendPopup(watcher, TextFormat.DARK_RED + "Leider musst du Zusehen, da die Warteliste voll ist :(");
+                        return;
                         
                     }
                     
@@ -406,11 +477,8 @@ public class GamePlayers {
                         if(isEnoughPlayers() == false) {
                             
                             sendPopupToAll(TextFormat.DARK_GREEN + "Es sind genug Spieler in der Warteliste eingetragen, das Spiel beginnt gleich...");
-                            
                             PlaySound(Sound.NOTE_HAT);
-                            
                             GameSchedule.RoundStart();
-                            
                             GamePlayers.setEnoughPlayers(true);
                             
                         }

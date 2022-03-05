@@ -1,8 +1,5 @@
 package deno.game;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import cn.nukkit.Server;
 import cn.nukkit.level.Sound;
 import cn.nukkit.scheduler.TaskHandler;
@@ -12,9 +9,8 @@ import deno.arena.Arena;
 
 public class GameSchedule {
     
-    public static TaskHandler task;
     public static TaskHandler nowRunnedTask;
-    public static List<TaskHandler> allTasks = new ArrayList<>();
+    public static TaskHandler RoundTask;
     public static int randomInt;
     public static int i = 5;
     
@@ -25,120 +21,126 @@ public class GameSchedule {
     
     public static synchronized void RoundStart() {
         
-        task = Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> {
+        RoundTask = Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> {
             
+            GamePlayers.clearInventorys();
+            Arena.setIsGameStarted(true);
+
+            Arena.getFloor().mask();
+            GamePlayers.teleport(Arena.getGameWorld().getSpawnLocation());
             GamePlayers.getGamers().addAll(GamePlayers.getWaiters());
             GamePlayers.getWaiters().clear();
-            GamePlayers.clearInventorys();
-            GamePlayers.teleport(Arena.getGameWorld().getSpawnLocation());
-            WaitBeforeGameStarts();
+
+            Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> {
+                
+                GamePlayers.PlaySound(Sound.RANDOM_LEVELUP);
+                
+            }, 2);
             
+            nowRunnedTask = Server.getInstance().getScheduler().scheduleRepeatingTask(Main.plugin, ()-> {
+                
+                GamePlayers.sendPopupToAll(TextFormat.GOLD + "Spiel beginnt in " + i + " Sekunden");
+                i--;
+                
+            }, 20);
+            
+            Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> {
+                
+                nowRunnedTask.cancel();
+                GameSystem();
+                
+            }, 100);
+
         }, Arena.getBeforeGameStartsTime() * 20);
         
     }
-    public static void WaitBeforeGameStarts() {
+    
+    public static void GameSystem() {
         
-        task.cancel();
-        
-        allTasks.add((nowRunnedTask = Server.getInstance().getScheduler().scheduleRepeatingTask(Main.plugin, ()-> {
-            
-                
-            GamePlayers.sendPopupToAll(TextFormat.GOLD + "Spiel beginnt in " + i + " Sekunden");
-            
-            i--;
-            
-        }, 20)));
-        
-        Arena.getFloor().mask();
-        
-        allTasks.add(Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> {
-            
-            nowRunnedTask.cancel();
+        if(Arena.isGameStarted()) {
             
             randomInt = Arena.getFloor().usedIntegers.get(Integer.valueOf((int) (Math.random() * ((Arena.getFloor().usedIntegers.size() - 0)))));
+            newtime = time;
             
-            Arena.getBoard().setColor(randomInt);
-            
-            GamePlayers.showColor(randomInt);
-            
-            JustPickOneColor();
-                
-        }, 5 * 20));
-    }
-    
-    public static void JustPickOneColor() {
-        
-        newtime = time;
-
-        allTasks.add(nowRunnedTask = Server.getInstance().getScheduler().scheduleRepeatingTask(Main.plugin, ()-> {
-            
-                
-            GamePlayers.PlaySound(Sound.NOTE_PLING);
-            
-            GamePlayers.sendCountPopupToAll(TextFormat.colorize("&" + Arena.getColorCodeByBlockColor(randomInt) + newtime));
-            GamePlayers.sendPopupToAll(TextFormat.colorize("&" + Arena.getColorCodeByBlockColor(randomInt) + "« « « " + Arena.getColorNameByInt(randomInt) + " » » »"));
-            
-            newtime -= 1;
-            
-        }, 20));
-        
-        allTasks.add(Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, () -> {
-            
-            GamePlayers.sendCountPopupToAll("");
-            GamePlayers.sendPopupToAll(TextFormat.DARK_RED + "" + TextFormat.BOLD + "✘ Stop ✘");
-            
-            nowRunnedTask.cancel();
-            
-            GamePlayers.PlaySound(Sound.NOTE_SNARE);
-            GamePlayers.clearInventorys();
-            Arena.getFloor().pickColor(randomInt);
-            MakeFloorBack();
-            
-            runden++;
-            
-            if(runden == 6 && time != 3.0) {
-                
-                runden = 0;
-                time -= 1;
-                
-            }
-            
-        }, time*20));
-        
-    }
-    
-    public static void MakeFloorBack() {
-        
-        allTasks.add(Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> {
-            
-            GamePlayers.sendCountPopupToAll(TextFormat.colorize("&bNoch &3" + GamePlayers.getGamers().size() + " &bSpieler"));
-            GamePlayers.sendPopupToAll(TextFormat.AQUA + "Warte...");
-            
-        }, 2 * 20));
-        
-        allTasks.add(Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> {
-            GamePlayers.sendCountPopupToAll("");
-            GamePlayers.sendPopupToAll("");
-            Arena.getFloor().back();
-            GamePlayers.PlaySound(Sound.NOTE_BELL);
-            
-            Waiting();
-            
-        }, 3 * 20));
-        
-    }
-    public static void Waiting() {
-        
-        allTasks.add(Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> {
-                
-            randomInt = Arena.getFloor().usedIntegers.get(Integer.valueOf((int) (Math.random() * ((Arena.getFloor().usedIntegers.size() - 0)))));
             Arena.getBoard().setColor(randomInt);
             GamePlayers.showColor(randomInt);
             
-            JustPickOneColor();
             
-        }, 2 * 20));
-        
+            nowRunnedTask = Server.getInstance().getScheduler().scheduleRepeatingTask(Main.plugin, ()-> {
+                
+                String VisualTimer = "▇▆▅▄▃▂";
+                String VT = "";
+                
+                for(int i = newtime; i != 0; i--)
+                    VT = VT + VisualTimer.charAt(i - 1);
+                
+                if(newtime == 6) GamePlayers.PlaySound(Sound.NOTE_DIDGERIDOO, 3);
+                if(newtime == 5) GamePlayers.PlaySound(Sound.NOTE_BASS, 3);
+                if(newtime == 4) GamePlayers.PlaySound(Sound.NOTE_DIDGERIDOO, 2);
+                if(newtime == 3) GamePlayers.PlaySound(Sound.NOTE_BASS, 2);
+                if(newtime == 2) GamePlayers.PlaySound(Sound.NOTE_DIDGERIDOO, 1);
+                if(newtime == 1) GamePlayers.PlaySound(Sound.NOTE_BASS, 1);
+                
+                GamePlayers.sendPlayerCountPopupToAll(TextFormat.colorize("&f" + GamePlayers.getGamers().size() + "&7/&8" + GamePlayers.getMaxPlayers()));
+                GamePlayers.sendPopupToAll(TextFormat.colorize("&" + Arena.getColorCodeByBlockColor(randomInt) + VT + " " + Arena.getColorNameByInt(randomInt) + Arena.rotate(VT)));
+                
+                newtime--;
+                
+            }, 20);
+            
+            Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, () -> {
+                
+                GamePlayers.sendPlayerCountPopupToAll(TextFormat.colorize("&f" + GamePlayers.getGamers().size() + "&7/&8" + GamePlayers.getMaxPlayers()));
+                GamePlayers.sendPopupToAll(TextFormat.DARK_RED + "" + TextFormat.BOLD + "✘ Stop ✘");
+                
+                nowRunnedTask.cancel();
+                
+                GamePlayers.PlaySound(Sound.NOTE_SNARE);
+                GamePlayers.clearInventorys();
+                Arena.getFloor().pickColor(randomInt);
+                
+                Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> { GamePlayers.sendPopupToAll(TextFormat.DARK_RED + "" + TextFormat.BOLD + "✘ Stop ✘"); }, 20);
+                
+                Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> {
+                    
+                    GamePlayers.sendPlayerCountPopupToAll(TextFormat.colorize("&f" + GamePlayers.getGamers().size() + "&7/&8" + GamePlayers.getMaxPlayers()));
+                    GamePlayers.sendPopupToAll(TextFormat.AQUA + "Warte...");
+                    
+                }, 2 * 20);
+                
+                Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> {
+                    
+                    GamePlayers.sendPopupToAll(TextFormat.AQUA + "Warte...");
+                    GamePlayers.sendPlayerCountPopupToAll(TextFormat.colorize("&f" + GamePlayers.getGamers().size() + "&7/&8" + GamePlayers.getMaxPlayers()));
+                    Arena.getFloor().back();
+                    GamePlayers.PlaySound(Sound.NOTE_BELL);
+                    
+                    Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> { GamePlayers.sendPopupToAll(TextFormat.AQUA + "Warte..."); }, 20);
+                    
+                    Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> {
+                        
+                        randomInt = Arena.getFloor().usedIntegers.get(Integer.valueOf((int) (Math.random() * ((Arena.getFloor().usedIntegers.size() - 0)))));
+                        
+                        GameSystem();
+                        
+                    }, 2 * 20);
+                    
+                }, 3 * 20);
+                
+                runden++;
+                
+                if(runden == 6 && time != 3.0) {
+                    
+                    runden = 0;
+                    time--;
+                    
+                }
+                
+            }, time*20);
+            
+        }
+                
     }
+    
     
 }

@@ -9,14 +9,4 @@ main: deno.Main
 commands: 
    farbarena:
       description: Öffnet das Farbarena Gamemenü
-      aliases: ["farb", "f", "arena", "a", "fa"]
-      permission: deno.farbarena.master
-      
-permissions:
-   deno.farbarena.master:
-      description: erlaubt den Vollzugriff auf das Plugin
-      default: op
-      children:
-         deno.farbarena:
-            description: Keine Ahnung, dir wird schon eine Beschreibung einfallen :p
-            default: default
+      aliases: ["farb", "arena"]

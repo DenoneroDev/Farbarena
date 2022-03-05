@@ -72,7 +72,6 @@ public class EventListener implements Listener {
         }
         
     }
-    @SuppressWarnings("deprecation")
     @EventHandler
     public void on(PlayerFormRespondedEvent e) {
         
@@ -128,31 +127,30 @@ public class EventListener implements Listener {
                     
                 }
                 
-                GamePlayers.getWaiters().remove(p);
+                if(GamePlayers.getWaiters().contains(p)) GamePlayers.getWaiters().remove(p);
                 
-                if(GamePlayers.getWaiters().size() < GamePlayers.getMinPlayers() && GameSchedule.task != null) {
+                if(GamePlayers.getWaiters().size() < GamePlayers.getMinPlayers()) {
                     
                     Arena.setBeforeGameStartsTime(15);
-                    GameSchedule.task.cancel();
                     GamePlayers.setEnoughPlayers(false);
+                    GameSchedule.RoundTask.cancel();
                     
                 }
                 
                 GamePlayers.sendPopup(p, TextFormat.DARK_GREEN + "Du bist erfolgreich von der" + TextFormat.GOLD + " Farbarena " + TextFormat.DARK_GREEN + "Warteliste ausgetreten.");
                 
-            } else {
+            } else if(!GamePlayers.getGamers().contains(p)) {
+                
+                if(!Arena.isWatcherSpawnSaved()) {
+                    
+                    p.sendMessage(TextFormat.RED + "Du kannst leider nicht zusehen, es gibt keinen Zuschauerspawn :/");
+                    return;
+                    
+                }
                 
                 GamePlayers.getWatchers().add(p);
                 
-                p.setAllowFlight(true);
-                
-                GamePlayers.getGamers().forEach(gamer -> {
-                    
-                    gamer.hidePlayer(p); 
-                    
-                });
-                
-                p.teleport(Arena.getGameWorld().getSpawnLocation());
+                p.teleport(Arena.getWatcherSpawn());
             }
             
         }
@@ -162,12 +160,13 @@ public class EventListener implements Listener {
     @EventHandler
     public void on(PlayerJoinEvent e) {
         
+        e.getPlayer().setGamemode(2);
         e.getPlayer().setFoodEnabled(false);
         e.getPlayer().getFoodData().reset();
         
     }
     @EventHandler
-    public void on(DataPacketReceiveEvent  e) {
+    public synchronized void on(DataPacketReceiveEvent  e) {
         
         if (e.getPacket() instanceof SetLocalPlayerAsInitializedPacket) {
             
@@ -193,22 +192,15 @@ public class EventListener implements Listener {
         
         Player p = e.getPlayer();
         
-        if(GamePlayers.getWaiters().contains(p)) {
-            
+        if(GamePlayers.getWaiters().contains(p))
             GamePlayers.getWaiters().remove(p);
-            
-        }
-        if(GamePlayers.getWatchers().contains(p)) {
-            
-            GamePlayers.getWatchers().remove(p);
-            
-        }
-        
-        if(GamePlayers.getWaiters().size() < GamePlayers.getMinPlayers() && GameSchedule.task != null) {
+        if(GamePlayers.getWatchers().contains(p))
+            GamePlayers.getWatchers().remove(p);        
+        if(Arena.isGameStarted() && GamePlayers.getWaiters().size() < GamePlayers.getMinPlayers()) {
             
             Arena.setBeforeGameStartsTime(15);
-            GameSchedule.task.cancel();
             GamePlayers.setEnoughPlayers(false);
+            GameSchedule.RoundTask.cancel();
             
         }
     }

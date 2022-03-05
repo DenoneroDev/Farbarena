@@ -119,6 +119,9 @@ public class Floor {
                 FirstX++;
 
             }
+            
+            for(Location l : Blocks)
+                Arena.getGameWorld().setBlock(l, Arena.getDefaultBlock());
                 
         });
                 
