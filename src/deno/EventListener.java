@@ -10,10 +10,8 @@ import cn.nukkit.event.player.PlayerDropItemEvent;
 import cn.nukkit.event.player.PlayerFormRespondedEvent;
 import cn.nukkit.event.player.PlayerJoinEvent;
 import cn.nukkit.event.player.PlayerQuitEvent;
-import cn.nukkit.event.server.DataPacketReceiveEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Sound;
-import cn.nukkit.network.protocol.SetLocalPlayerAsInitializedPacket;
 import cn.nukkit.utils.TextFormat;
 import deno.arena.Arena;
 import deno.game.GamePlayers;
@@ -129,7 +127,7 @@ public class EventListener implements Listener {
                 
                 if(GamePlayers.getWaiters().contains(p)) GamePlayers.getWaiters().remove(p);
                 
-                if(GamePlayers.getWaiters().size() < GamePlayers.getMinPlayers()) {
+                if(GamePlayers.getWaiters().size() < GamePlayers.getMinPlayers() && Arena.isGameStarted()) {
                     
                     Arena.setBeforeGameStartsTime(15);
                     GamePlayers.setEnoughPlayers(false);
@@ -148,7 +146,7 @@ public class EventListener implements Listener {
                     
                 }
                 
-                GamePlayers.getWatchers().add(p);
+                if(!GamePlayers.getWatchers().contains(p)) GamePlayers.getWatchers().add(p);
                 
                 p.teleport(Arena.getWatcherSpawn());
             }
@@ -163,16 +161,6 @@ public class EventListener implements Listener {
         e.getPlayer().setGamemode(2);
         e.getPlayer().setFoodEnabled(false);
         e.getPlayer().getFoodData().reset();
-        
-    }
-    @EventHandler
-    public synchronized void on(DataPacketReceiveEvent  e) {
-        
-        if (e.getPacket() instanceof SetLocalPlayerAsInitializedPacket) {
-            
-            e.getPlayer().teleport(Arena.getLobbyWorld().getSpawnLocation());
-            
-        }
         
     }
     @EventHandler

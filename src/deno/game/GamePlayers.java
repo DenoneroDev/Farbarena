@@ -19,7 +19,7 @@ public class GamePlayers {
     private static CopyOnWriteArrayList<Player> Watcher = new CopyOnWriteArrayList<>();
     private static CopyOnWriteArrayList<Player> Gamer = new CopyOnWriteArrayList<>();
     private static int max = 10;
-    private static int min = 1; //TODO 2
+    private static int min = 2; //TODO 2
     private static boolean isEnoughPlayers = false;
     private static boolean canRun = true;
     
@@ -424,6 +424,7 @@ public class GamePlayers {
         
         Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> {
             
+            canRun = true;
             Arena.setIsGameStarted(false);
             isEnoughPlayers = false;
             teleport(Arena.getLobbyWorld().getSpawnLocation());

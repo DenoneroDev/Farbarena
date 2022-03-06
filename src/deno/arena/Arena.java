@@ -46,7 +46,7 @@ public class Arena {
     public static void createGameWorld() {
         
         Long seed = new Random().nextLong();
-        Class<? extends Generator> generator = Generator.getGenerator(99);
+        Class<? extends Generator> generator = Generator.getGenerator(5);
         Server.getInstance().generateLevel(getGameWorldName(), seed, generator);
         getGameWorld().setSpawnLocation(new Location(0.5, 7, 0.5));
         getGameWorld().setBlock(Server.getInstance().getLevelByName(getGameWorldName()).getSpawnLocation().add(0, -7), Block.get(Block.STONE));
@@ -155,7 +155,7 @@ public class Arena {
     }
     public static String getColorNameByInt(int i) {
         
-        String color = "Weiß,Orange,Lila,Hellblau,Gelb,Hellgrün,Rosa,Dunkelgrau,Hellgrau,Türkis,Violett,Blau,Braun,Dunkelgrün,Rot,Schwarz";
+        String color = "Weiß,Orange,Magenta,Hellblau,Gelb,Hellgrün,Rosa,Dunkelgrau,Hellgrau,Türkis,Violett,Blau,Braun,Dunkelgrün,Rot,Schwarz";
         return color.split(",")[i];
         
     }

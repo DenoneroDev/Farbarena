@@ -4,7 +4,6 @@ import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.data.CommandEnum;
 import cn.nukkit.command.data.CommandParameter;
-import cn.nukkit.level.generator.Generator;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.TextFormat;
 import deno.arena.Arena;
@@ -17,7 +16,6 @@ public class Main extends PluginBase {
     public void onLoad() {
         
         plugin = this;
-        Generator.addGenerator(EmptyGenerator.class, "void", 99);
         
         this.getLogger().info(TextFormat.colorize("&d" + this.getDescription().getName() + " Version &4" + 
                 this.getDescription().getVersion() + " &aladen... \t &dCopyrights by &c" + String.join(", ", this.getDescription().getAuthors())));
