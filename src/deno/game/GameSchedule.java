@@ -31,11 +31,7 @@ public class GameSchedule {
             GamePlayers.getGamers().addAll(GamePlayers.getWaiters());
             GamePlayers.getWaiters().clear();
 
-            Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> {
-                
-                GamePlayers.PlaySound(Sound.RANDOM_LEVELUP);
-                
-            }, 2);
+            Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> GamePlayers.PlaySound(Sound.RANDOM_LEVELUP), 2);
             
             nowRunnedTask = Server.getInstance().getScheduler().scheduleRepeatingTask(Main.plugin, ()-> {
                 
@@ -59,7 +55,7 @@ public class GameSchedule {
         
         if(Arena.isGameStarted()) {
             
-            randomInt = Arena.getFloor().usedIntegers.get(Integer.valueOf((int) (Math.random() * ((Arena.getFloor().usedIntegers.size() - 0)))));
+            randomInt = Arena.getFloor().usedIntegers.get((int) (Math.random() * ((Arena.getFloor().usedIntegers.size()))));
             newtime = time;
             
             Arena.getBoard().setColor(randomInt);
@@ -69,10 +65,10 @@ public class GameSchedule {
             nowRunnedTask = Server.getInstance().getScheduler().scheduleRepeatingTask(Main.plugin, ()-> {
                 
                 String VisualTimer = "▇▆▅▄▃▂";
-                String VT = "";
+                StringBuilder VT = new StringBuilder();
                 
                 for(int i = newtime; i != 0; i--)
-                    VT = VT + VisualTimer.charAt(i - 1);
+                    VT.append(VisualTimer.charAt(i - 1));
                 
                 if(newtime == 6) GamePlayers.PlaySound(Sound.NOTE_DIDGERIDOO, 3);
                 if(newtime == 5) GamePlayers.PlaySound(Sound.NOTE_BASS, 3);
@@ -81,8 +77,10 @@ public class GameSchedule {
                 if(newtime == 2) GamePlayers.PlaySound(Sound.NOTE_DIDGERIDOO, 1);
                 if(newtime == 1) GamePlayers.PlaySound(Sound.NOTE_BASS, 1);
                 
+                int textcolor = (time > 3) ? randomInt : Arena.getFloor().usedIntegers.get((int) (Math.random() * ((Arena.getFloor().usedIntegers.size()))));
+                
                 GamePlayers.sendPlayerCountPopupToAll(TextFormat.colorize("&f" + GamePlayers.getGamers().size() + "&7/&8" + GamePlayers.getMaxPlayers()));
-                GamePlayers.sendPopupToAll(TextFormat.colorize("&" + Arena.getColorCodeByBlockColor(randomInt) + VT + " " + Arena.getColorNameByInt(randomInt) + Arena.rotate(VT)));
+                GamePlayers.sendPopupToAll(TextFormat.colorize("&" + Arena.getColorCodeByBlockColor(textcolor) + VT + " " + Arena.getColorNameByInt(randomInt) + Arena.rotate(VT.toString())));
                 
                 newtime--;
                 
@@ -99,7 +97,7 @@ public class GameSchedule {
                 GamePlayers.clearInventorys();
                 Arena.getFloor().pickColor(randomInt);
                 
-                Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> { GamePlayers.sendPopupToAll(TextFormat.DARK_RED + "" + TextFormat.BOLD + "✘ Stop ✘"); }, 20);
+                Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> GamePlayers.sendPopupToAll(TextFormat.DARK_RED + "" + TextFormat.BOLD + "✘ Stop ✘"), 20);
                 
                 Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> {
                     
@@ -115,11 +113,11 @@ public class GameSchedule {
                     Arena.getFloor().back();
                     GamePlayers.PlaySound(Sound.NOTE_BELL);
                     
-                    Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> { GamePlayers.sendPopupToAll(TextFormat.AQUA + "Warte..."); }, 20);
+                    Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> GamePlayers.sendPopupToAll(TextFormat.AQUA + "Warte..."), 20);
                     
                     Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> {
                         
-                        randomInt = Arena.getFloor().usedIntegers.get(Integer.valueOf((int) (Math.random() * ((Arena.getFloor().usedIntegers.size() - 0)))));
+                        randomInt = Arena.getFloor().usedIntegers.get((int) (Math.random() * ((Arena.getFloor().usedIntegers.size()))));
                         
                         GameSystem();
                         
@@ -129,7 +127,7 @@ public class GameSchedule {
                 
                 runden++;
                 
-                if(runden == 6 && time != 3.0) {
+                if(runden == 6 && time != 2) {
                     
                     runden = 0;
                     time--;

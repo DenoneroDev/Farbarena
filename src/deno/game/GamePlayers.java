@@ -15,11 +15,11 @@ import deno.arena.Arena;
 
 public class GamePlayers {
     
-    private static CopyOnWriteArrayList<Player> Waiting = new CopyOnWriteArrayList<>();
-    private static CopyOnWriteArrayList<Player> Watcher = new CopyOnWriteArrayList<>();
-    private static CopyOnWriteArrayList<Player> Gamer = new CopyOnWriteArrayList<>();
-    private static int max = 10;
-    private static int min = 2; //TODO 2
+    private static final CopyOnWriteArrayList<Player> Waiting = new CopyOnWriteArrayList<>();
+    private static final CopyOnWriteArrayList<Player> Watcher = new CopyOnWriteArrayList<>();
+    private static final CopyOnWriteArrayList<Player> Gamer = new CopyOnWriteArrayList<>();
+    private static final int max = 10;
+    private static final int min = 2; //TODO 2
     private static boolean isEnoughPlayers = false;
     private static boolean canRun = true;
     
@@ -87,29 +87,17 @@ public class GamePlayers {
         
         if(!Waiting.isEmpty()) {
             
-            Waiting.forEach(waiter -> {
-                
-                sendPlayerCountPopup(waiter, message);
-                
-            });
+            Waiting.forEach(waiter -> sendPlayerCountPopup(waiter, message));
             
         }
         if(!Watcher.isEmpty()) {
             
-            Watcher.forEach(watcher -> {
-                
-                sendPlayerCountPopup(watcher, message);
-                
-            });
+            Watcher.forEach(watcher -> sendPlayerCountPopup(watcher, message));
             
         }
         if(!Gamer.isEmpty()) {
             
-            Gamer.forEach(gamer -> {
-                
-                sendPlayerCountPopup(gamer, message);
-                
-            });
+            Gamer.forEach(gamer -> sendPlayerCountPopup(gamer, message));
             
         }
         
@@ -118,29 +106,17 @@ public class GamePlayers {
         
         if(!Waiting.isEmpty()) {
             
-            Waiting.forEach(waiter -> {
-                
-                sendPopup(waiter, message);
-                
-            });
+            Waiting.forEach(waiter -> sendPopup(waiter, message));
             
         }
         if(!Watcher.isEmpty()) {
             
-            Watcher.forEach(watcher -> {
-                
-                sendPopup(watcher, message);
-                
-            });
+            Watcher.forEach(watcher -> sendPopup(watcher, message));
             
         }
         if(!Gamer.isEmpty()) {
             
-            Gamer.forEach(gamer -> {
-                
-                sendPopup(gamer, message);
-                
-            });
+            Gamer.forEach(gamer -> sendPopup(gamer, message));
             
         }
         
@@ -169,29 +145,17 @@ public class GamePlayers {
         
         if(!Waiting.isEmpty()) {
             
-            Waiting.forEach(waiter -> {
-                
-                playSoundFor(waiter, s, p);
-                
-            });
+            Waiting.forEach(waiter -> playSoundFor(waiter, s, p));
             
         }
         if(!Watcher.isEmpty()) {
             
-            Watcher.forEach(watcher -> {
-                
-                playSoundFor(watcher, s, p);
-                
-            });
+            Watcher.forEach(watcher -> playSoundFor(watcher, s, p));
             
         }
         if(!Gamer.isEmpty()) {
             
-            Gamer.forEach(gamer -> {
-                
-                playSoundFor(gamer, s, p);
-                
-            });
+            Gamer.forEach(gamer -> playSoundFor(gamer, s, p));
             
         }
         
@@ -201,29 +165,17 @@ public class GamePlayers {
         
         if(!Waiting.isEmpty()) {
             
-            Waiting.forEach(waiter -> {
-                
-                playSoundFor(waiter, s, 1);
-                
-            });
+            Waiting.forEach(waiter -> playSoundFor(waiter, s, 1));
             
         }
         if(!Watcher.isEmpty()) {
             
-            Watcher.forEach(watcher -> {
-                
-                playSoundFor(watcher, s, 1);
-                
-            });
+            Watcher.forEach(watcher -> playSoundFor(watcher, s, 1));
             
         }
         if(!Gamer.isEmpty()) {
             
-            Gamer.forEach(gamer -> {
-                
-                playSoundFor(gamer, s, 1);
-                
-            });
+            Gamer.forEach(gamer -> playSoundFor(gamer, s, 1));
             
         }
         
@@ -233,11 +185,7 @@ public class GamePlayers {
         
         if(!Waiting.isEmpty()) {
             
-            Waiting.forEach(waiter -> {
-                
-                waiter.teleport(l);
-                
-            });
+            Waiting.forEach(waiter -> waiter.teleport(l));
             
         }
         if(!Watcher.isEmpty()) {
@@ -316,33 +264,22 @@ public class GamePlayers {
         
         if(!Waiting.isEmpty()) {
             
-            Waiting.forEach(waiter -> {
-                
-                waiter.sendMessage(msg);
-                
-            });
+            Waiting.forEach(waiter -> waiter.sendMessage(msg));
             
         }
         if(!Watcher.isEmpty()) {
             
-            Watcher.forEach(watcher -> {
-                
-                watcher.sendMessage(msg);
-            
-            });
+            Watcher.forEach(watcher -> watcher.sendMessage(msg));
             
         }
         if(!Gamer.isEmpty()) {
             
-            Gamer.forEach(gamer -> {
-                
-                gamer.sendMessage(msg);
-                
-            });
+            Gamer.forEach(gamer -> gamer.sendMessage(msg));
             
         }
         
     }
+    @SuppressWarnings("deprecation")
     public synchronized static void GameOver(Player p) {
         
         if(!p.getInventory().isEmpty()) 
@@ -361,7 +298,7 @@ public class GamePlayers {
             }
             
         }
-        if(Gamer.size() > 1) {
+        if(Gamer.size() > 0) {
             
             sendMessageToAll(TextFormat.GOLD + "#" + Gamer.size() + "  " + TextFormat.DARK_RED + p.getName() + " hat verloren!");
             Gamer.remove(p);
@@ -371,17 +308,14 @@ public class GamePlayers {
                 if(Arena.isWatcherSpawnSaved()) {
                     
                     Watcher.add(p);
+                    p.setAllowFlight(true);
                     
                 }
-                Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> {
-                    
-                    GamePlayers.PlaySound(Sound.AMBIENT_WEATHER_THUNDER);
-                    
-                }, 2);
+                Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> GamePlayers.PlaySound(Sound.AMBIENT_WEATHER_THUNDER), 2);
                 
             }
             
-            if(Gamer.size() == 1 && canRun == true) {
+            if(Gamer.size() == 0 && canRun) {
                 
                 end();
                 canRun = false;
@@ -390,10 +324,11 @@ public class GamePlayers {
                 
             return;
         }
-        if(canRun == true)
+        if(canRun)
             end();
         
     }
+    @SuppressWarnings("deprecation")
     public synchronized static void end() {
         
         Arena.getFloor().placedBlockLocations.clear();
@@ -412,12 +347,9 @@ public class GamePlayers {
             
             Gamer.get(0).sendTitle(TextFormat.GREEN + "Du hast gewonnen :D");
             sendMessageToAll(TextFormat.colorize("&3" + Gamer.get(0).getName() + " &dhat das Spiel gewonnen!"));
+            Gamer.get(0).setScale(20);
             
-            Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> {
-                
-                playSoundFor(Gamer.get(0), Sound.FIREWORK_LAUNCH);
-                
-            }, 2);
+            Server.getInstance().getScheduler().scheduleDelayedTask(Main.plugin, ()-> playSoundFor(Gamer.get(0), Sound.FIREWORK_LAUNCH), 2);
             
         }
             
@@ -446,7 +378,7 @@ public class GamePlayers {
                 
                 if(Waiting.size() >= min) {
                     
-                    if(isEnoughPlayers() == false) {
+                    if(!isEnoughPlayers()) {
                         
                         sendPopupToAll(TextFormat.DARK_GREEN + "Es sind genug Spieler in der Warteliste eingetragen, das Spiel beginnt gleich...");
                         PlaySound(Sound.NOTE_HAT);
@@ -475,7 +407,7 @@ public class GamePlayers {
                     
                     if(Waiting.size() >= min) {
                         
-                        if(isEnoughPlayers() == false) {
+                        if(!isEnoughPlayers()) {
                             
                             sendPopupToAll(TextFormat.DARK_GREEN + "Es sind genug Spieler in der Warteliste eingetragen, das Spiel beginnt gleich...");
                             PlaySound(Sound.NOTE_HAT);
@@ -489,8 +421,13 @@ public class GamePlayers {
                 });
                 
             }
-                
+            Gamer.get(0).setScale(1);
             Gamer.clear();
+            for(Player watcher : Watcher) {
+                
+                watcher.setAllowFlight(false);
+                
+            }
             Watcher.clear();
                 
         }, 200);

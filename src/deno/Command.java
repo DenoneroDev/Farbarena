@@ -3,6 +3,7 @@ package deno;
 import cn.nukkit.Player;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.ConsoleCommandSender;
+import cn.nukkit.entity.Entity;
 import cn.nukkit.form.element.ElementButton;
 import cn.nukkit.form.window.FormWindowSimple;
 import cn.nukkit.item.Item;
@@ -21,7 +22,6 @@ public class Command {
             return true;
 
         }
-
         Player p = (Player) sender;
         
         if(!p.hasPermission("deno.farbarena.join") && !p.hasPermission("deno.farbarena.master")) {
@@ -53,7 +53,7 @@ public class Command {
             }
             if (!Arena.isBoardSaved()) {
 
-                p.sendMessage(TextFormat.colorize("&cDu hast die Farbarena Tafel nicht erstellt, benutze &4/farb board create&c, um die Tafel zu erstellen!"));
+            p.sendMessage(TextFormat.colorize("&cDu hast die Farbarena Tafel nicht erstellt, benutze &4/farb board create&c, um die Tafel zu erstellen!"));
                 return true;
 
             }
@@ -62,8 +62,8 @@ public class Command {
             
             if(Arena.isGameStarted()) {
                 
-                form.addButton(new ElementButton(TextFormat.AQUA + "Schick mich ins Spiel, damit ich zusehen kann :D"));
                 form.setContent(TextFormat.DARK_GREEN + "Leider läuft gerade ein Spiel, du kannst aber zusehen :D");
+                form.addButton(new ElementButton(TextFormat.AQUA + "Schick mich ins Spiel, damit ich zusehen kann :D"));
             
             } else {
                 
@@ -153,6 +153,13 @@ public class Command {
                     
                 }
                 
+                break;
+                
+            case "npc":
+
+                Entity ent = Entity.createEntity("Farbenmeister", p.getChunk(), Entity.getDefaultNBT(p));
+                ent.spawnToAll();
+
                 break;
             
             case "world": case "level": case "lvl":

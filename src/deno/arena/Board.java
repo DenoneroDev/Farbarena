@@ -10,8 +10,8 @@ import cn.nukkit.level.Location;
 
 public class Board {
     
-    private String ConfigPath = "BoardAngles";
-    private CopyOnWriteArrayList<Location> Blocks = new CopyOnWriteArrayList<>();
+    private final String ConfigPath = "BoardAngles";
+    private final CopyOnWriteArrayList<Location> Blocks = new CopyOnWriteArrayList<>();
     private boolean isMarked = false;
     private Location FirstAngle;
     private Location SecondAngle;
@@ -26,22 +26,14 @@ public class Board {
         return isMarked;
     
     }
-    public Location getFirstAngle() {
-        
-        return FirstAngle;
-        
-    }
+
     public void setFirstAngle(Location l) {
         
         isMarked = true;
         FirstAngle = l;
         
     }
-    public Location getSecondAngle() {
-        
-        return SecondAngle;
-        
-    }
+
     public void setSecondAngle(Location l) {
         
         SecondAngle = l;
@@ -51,12 +43,12 @@ public class Board {
         
         CompletableFuture.runAsync(() -> {
             
-            int FirstX = (int) ((FirstAngle.getX() < SecondAngle.getX()) ? FirstAngle.getX() : SecondAngle.getX());
-            int FirstY = (int) ((FirstAngle.getY() < SecondAngle.getY()) ? FirstAngle.getY() : SecondAngle.getY());
-            int FirstZ = (int) ((FirstAngle.getZ() < SecondAngle.getZ()) ? FirstAngle.getZ() : SecondAngle.getZ());
-            int SecondX = (int) ((FirstAngle.getX() > SecondAngle.getX()) ? FirstAngle.getX() : SecondAngle.getX());
-            int SecondY = (int) ((FirstAngle.getY() > SecondAngle.getY()) ? FirstAngle.getY() : SecondAngle.getY());
-            int SecondZ = (int) ((FirstAngle.getZ() > SecondAngle.getZ()) ? FirstAngle.getZ() : SecondAngle.getZ());
+            int FirstX = (int) (Math.min(FirstAngle.getX(), SecondAngle.getX()));
+            int FirstY = (int) (Math.min(FirstAngle.getY(), SecondAngle.getY()));
+            int FirstZ = (int) (Math.min(FirstAngle.getZ(), SecondAngle.getZ()));
+            int SecondX = (int) (Math.max(FirstAngle.getX(), SecondAngle.getX()));
+            int SecondY = (int) (Math.max(FirstAngle.getY(), SecondAngle.getY()));
+            int SecondZ = (int) (Math.max(FirstAngle.getZ(), SecondAngle.getZ()));
             
             String newFirstLocation = Arena.Location(FirstX, FirstY, FirstZ);
             String newSecondLocation = Arena.Location(SecondX, SecondY, SecondZ);

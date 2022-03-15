@@ -4,6 +4,7 @@ import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.data.CommandEnum;
 import cn.nukkit.command.data.CommandParameter;
+import cn.nukkit.entity.Entity;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.TextFormat;
 import deno.arena.Arena;
@@ -23,23 +24,20 @@ public class Main extends PluginBase {
     }
     public void onEnable() {
         
+        Entity.registerEntity("Farbenmeister", EntityFarbenmeister.class);
+        
         if(Arena.isFloorSaved()) Arena.getFloor().load();
         if(Arena.isBoardSaved()) Arena.getBoard().load();
         
         loadCommandParams();
-        
         this.getServer().getPluginManager().registerEvents(new EventListener(), this);
         this.getServer().getPluginManager().registerEvents(new GameListener(), this);
         
     }
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        
-        switch(cmd.getName()) {
-        
-        case "farbarena":
-            
+
+        if ("farbarena".equals(cmd.getName())) {
             return deno.Command.Farbarena(sender, args);
-        
         }
         return false;
         
@@ -69,8 +67,8 @@ public class Main extends PluginBase {
         });
         
     }
-    
 }
+
 /*#####################################################################
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!               !!!!!!!!!!!!!!!!!!!!!!!!!!!!

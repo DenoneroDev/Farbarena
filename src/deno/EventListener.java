@@ -70,10 +70,11 @@ public class EventListener implements Listener {
         }
         
     }
+    @SuppressWarnings("deprecation")
     @EventHandler
     public void on(PlayerFormRespondedEvent e) {
         
-        Player p = (Player) e.getPlayer();
+        Player p = e.getPlayer();
         
         if(e.getFormID() == 4444 && !(e.wasClosed())) {
             
@@ -85,7 +86,7 @@ public class EventListener implements Listener {
                 return;
                 
             }
-            if(Arena.isGameStarted() == false) {
+            if(!Arena.isGameStarted()) {
                 
                 if(GamePlayers.getWatchers().contains(p)) { 
                     
@@ -104,7 +105,7 @@ public class EventListener implements Listener {
                     
                     if(GamePlayers.getWaiters().size() >= GamePlayers.getMinPlayers()) {
                         
-                        if(GamePlayers.isEnoughPlayers() == false) {
+                        if(!GamePlayers.isEnoughPlayers()) {
                             
                             GamePlayers.sendPopupToAll(TextFormat.DARK_GREEN + "Es sind genug Spieler in der Warteliste eingetragen, das Spiel beginnt gleich...");
                             
@@ -124,7 +125,7 @@ public class EventListener implements Listener {
                     return;
                     
                 }
-                
+
                 if(GamePlayers.getWaiters().contains(p)) GamePlayers.getWaiters().remove(p);
                 
                 if(GamePlayers.getWaiters().size() < GamePlayers.getMinPlayers() && Arena.isGameStarted()) {
@@ -146,7 +147,12 @@ public class EventListener implements Listener {
                     
                 }
                 
-                if(!GamePlayers.getWatchers().contains(p)) GamePlayers.getWatchers().add(p);
+                if(!GamePlayers.getWatchers().contains(p)) {
+                    
+                    GamePlayers.getWatchers().add(p);
+                    p.setAllowFlight(true);
+                    
+                }
                 
                 p.teleport(Arena.getWatcherSpawn());
             }
@@ -166,13 +172,15 @@ public class EventListener implements Listener {
     @EventHandler
     public void on(InventoryClickEvent e) {
         
-        e.setCancelled();
+        if(!e.getPlayer().isOp())
+            e.setCancelled();
         
     }
     @EventHandler
     public void on(PlayerDropItemEvent e) {
         
-        e.setCancelled();
+        if(!e.getPlayer().isOp())
+            e.setCancelled();
         
     }
     @EventHandler

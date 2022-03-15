@@ -11,12 +11,12 @@ import cn.nukkit.level.Location;
 
 public class Floor {
     
-    private String ConfigPath = "FloorAngles";
-    private List<Location> Blocks = new ArrayList<>();
+    private final String ConfigPath = "FloorAngles";
+    private final List<Location> Blocks = new ArrayList<>();
     private boolean isMarked = false;
     private Location FirstAngle = null;
     private Location SecondAngle = null;
-    private int MaskSize = 3;
+    private final int MaskSize = 3;
     public List<Integer> usedIntegers = new ArrayList<>();
     public List<Location> placedBlockLocations = new ArrayList<>();
     public List<Block> removedBlocks = new ArrayList<>();
@@ -31,22 +31,14 @@ public class Floor {
         return isMarked;
     
     }
-    public Location getFirstAngle() {
-        
-        return FirstAngle;
-        
-    }
+
     public void setFirstAngle(Location l) {
         
         isMarked = true;
         FirstAngle = l;
         
     }
-    public Location getSecondAngle() {
-        
-        return SecondAngle;
-        
-    }
+
     public void setSecondAngle(Location l) {
         
         SecondAngle = l;
@@ -57,10 +49,10 @@ public class Floor {
         CompletableFuture.runAsync(() -> {
             
             double y = FirstAngle.getY();
-            double FirstX = (FirstAngle.getX() < SecondAngle.getX()) ? FirstAngle.getX() : SecondAngle.getX();
-            double FirstZ = (FirstAngle.getZ() < SecondAngle.getZ()) ? FirstAngle.getZ() : SecondAngle.getZ();
-            double SecondX = (FirstAngle.getX() > SecondAngle.getX()) ? FirstAngle.getX() : SecondAngle.getX();
-            double SecondZ = (FirstAngle.getZ() > SecondAngle.getZ()) ? FirstAngle.getZ() : SecondAngle.getZ();
+            double FirstX = Math.min(FirstAngle.getX(), SecondAngle.getX());
+            double FirstZ = Math.min(FirstAngle.getZ(), SecondAngle.getZ());
+            double SecondX = Math.max(FirstAngle.getX(), SecondAngle.getX());
+            double SecondZ = Math.max(FirstAngle.getZ(), SecondAngle.getZ());
             
             String newFirstLocation = Arena.Location(FirstX, y, FirstZ);
             String newSecondLocation = Arena.Location(SecondX, y, SecondZ);
@@ -128,8 +120,8 @@ public class Floor {
     }
     public void mask() {
         
-        List<Integer> x = new ArrayList<Integer>();
-        List<Integer> z = new ArrayList<Integer>();
+        List<Integer> x = new ArrayList<>();
+        List<Integer> z = new ArrayList<>();
         
         for(Location loc : Blocks) {
             
@@ -174,7 +166,7 @@ public class Floor {
                                 
                             }
                             
-                            int randomInt = integers.get((int) (Math.random() * ((integers.size() - 0))));
+                            int randomInt = integers.get((int) (Math.random() * ((integers.size()))));
                             
                             if(!usedIntegers.contains(randomInt)) {
                                 

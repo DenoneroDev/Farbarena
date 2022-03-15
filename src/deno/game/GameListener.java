@@ -4,9 +4,7 @@ import cn.nukkit.Player;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.entity.EntityDamageEvent;
-import cn.nukkit.event.player.PlayerItemHeldEvent;
 import cn.nukkit.event.player.PlayerQuitEvent;
-import deno.arena.Arena;
 
 public class GameListener implements Listener {
     
@@ -20,6 +18,7 @@ public class GameListener implements Listener {
         
         
     }
+    @SuppressWarnings("deprecation")
     @EventHandler
     public void on(EntityDamageEvent e) {
         
@@ -29,28 +28,14 @@ public class GameListener implements Listener {
             
         Player p = (Player) e.getEntity();
         
-        if(GamePlayers.getWatchers().contains(p)) {
-            
-            e.setCancelled();
-            p.teleport(Arena.getWatcherSpawn());
-            return;
-            
-        }
+        p.setScale(1);
+        p.setAllowFlight(false);
         
         if(!GamePlayers.getGamers().contains(p))
             return;
         
         e.setCancelled();
         GamePlayers.GameOver(p);
-        
-    }
-    @EventHandler
-    public void on(PlayerItemHeldEvent e) {
-        
-        if(!GamePlayers.getGamers().contains(e.getPlayer()))
-            return;
-        
-        e.setCancelled();
         
     }
 }

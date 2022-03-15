@@ -15,21 +15,21 @@ import cn.nukkit.utils.Config;
 import deno.Main;
 
 public class Arena {
-    
-    private static String LobbyWorldName = "minigames";
-    private static String GameWorldName = "farbarena";
-    private static File file = new File(Main.plugin.getDataFolder(), "Farbarena.yml");
-    private static Config config = new Config(file, Config.YAML);
-    private static Block DefaultBlock = Block.get(Block.WOOL);
-    private static Floor floor = new Floor();
-    private static Board board = new Board();
+
+    private static final String GameWorldName = "farbarena";
+    private static final File file = new File(Main.plugin.getDataFolder(), "Farbarena.yml");
+    private static final Config config = new Config(file, Config.YAML);
+    private static final Block DefaultBlock = Block.get(Block.WOOL);
+    private static final Floor floor = new Floor();
+    private static final Board board = new Board();
     private static boolean isGameStarted = false;
-    private static int BeforeGameStartsTime = 15;
+    private static int BeforeGameStartsTime = 60;
     
     public static Level getLobbyWorld() {
-        
-        Server.getInstance().loadLevel(LobbyWorldName);
-        return Server.getInstance().getLevelByName(LobbyWorldName);
+
+        String lobbyWorldName = "minigames";
+        Server.getInstance().loadLevel(lobbyWorldName);
+        return Server.getInstance().getLevelByName(lobbyWorldName);
         
     }
     public static Level getGameWorld() {
@@ -45,7 +45,7 @@ public class Arena {
     }
     public static void createGameWorld() {
         
-        Long seed = new Random().nextLong();
+        long seed = new Random().nextLong();
         Class<? extends Generator> generator = Generator.getGenerator(5);
         Server.getInstance().generateLevel(getGameWorldName(), seed, generator);
         getGameWorld().setSpawnLocation(new Location(0.5, 7, 0.5));
@@ -132,9 +132,8 @@ public class Arena {
     public static Location getWatcherSpawn() {
         
         String[] s = getConfig().getString("watcherspawn").split(", ");
-        Location loc = new Location(Double.parseDouble(s[1].replace("x=", "")), Double.parseDouble(s[2].replace("y=", "")), Double.parseDouble(s[3].replace("z=", "")), Server.getInstance().getLevelByName(s[0].replace("level=", "")));
-        
-        return loc;
+
+        return new Location(Double.parseDouble(s[1].replace("x=", "")), Double.parseDouble(s[2].replace("y=", "")), Double.parseDouble(s[3].replace("z=", "")), Server.getInstance().getLevelByName(s[0].replace("level=", "")));
         
     }
     public static Integer[] getXZ(Location loc) {
@@ -155,7 +154,7 @@ public class Arena {
     }
     public static String getColorNameByInt(int i) {
         
-        String color = "Weiß,Orange,Magenta,Hellblau,Gelb,Hellgrün,Rosa,Dunkelgrau,Hellgrau,Türkis,Violett,Blau,Braun,Dunkelgrün,Rot,Schwarz";
+        String color = "Weiß,Orange,Magenta,Hellblau,Gelb,Hellgrün,Rosa,Dunkelgrau,Hellgrau,Türkis,Lila,Blau,Braun,Dunkelgrün,Rot,Schwarz";
         return color.split(",")[i];
         
     }
@@ -171,12 +170,12 @@ public class Arena {
     }
     public static String rotate(String s) {
         
-        String ReturnValue = " ";
+        StringBuilder ReturnValue = new StringBuilder(" ");
         
         for(int i = s.length(); i != 0; i--)
-            ReturnValue = ReturnValue + s.charAt(i - 1);
+            ReturnValue.append(s.charAt(i - 1));
             
-        return ReturnValue;
+        return ReturnValue.toString();
         
     }
     public static boolean isWatcherSpawnSaved() {
